@@ -33,6 +33,8 @@
   <summary>More Screenshots</summary>
     <img width="700px" alt="image" src="https://github.com/user-attachments/assets/04286979-6bd9-4c02-92a1-b994242fc576" />
     <img width="700px" alt="image" src="https://github.com/user-attachments/assets/ca462852-6fae-4ec2-9479-af7f3e3a09a1" />
+    <img width="700px" alt="image" src="https://github.com/user-attachments/assets/9b23c9f4-5bc0-4e61-becd-c3cee71e2150" />
+
 </details>
 
 
