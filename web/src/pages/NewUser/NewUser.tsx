@@ -1,34 +1,37 @@
 import { Link } from "react-router-dom"
 import { FaUserFriends, FaUserPlus } from "react-icons/fa"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { type Account } from "../../types/Account"
 import PermissionToggle from "../../components/minimal/PermissionToggle/PermissionToggle"
 import { type AccountPermissions } from "../../types/AccountPermissions"
 import axiosInstance from "../../utils/axiosInstance"
 import MessageBox from "../../components/minimal/MessageBox/MessageBox"
 import { useNavigate } from 'react-router-dom';
+import { FaEye, FaDownload, FaFile, FaPen, FaShieldAlt } from "react-icons/fa";
+import { FaArrowRotateLeft } from "react-icons/fa6";
 
 const NewUser = () => {
   const navigate = useNavigate()
   const [error, setError] = useState<string>("");
+  const iconSize = 22;
   const [user, setUser] = useState<Account>({
     username: "",
     email: "",
     scope: "",
     password: "",
     permissions: {
-      read_directories: false,
-      read_files: false,
+      read_directories: true,
+      read_files: true,
       create: false,
       change: false,
       delete: false,
       move: false,
-      download_files: false,
+      download_files: true,
       upload_files: false,
       rename: false,
       extract: false,
       copy: false,
-      read_recovery: false,
+      read_recovery: true,
       use_recovery: false,
       read_users: false,
       edit_users: false,
@@ -57,6 +60,26 @@ const NewUser = () => {
     }))
   }
 
+  const disableAllPermissions = useCallback(() => {
+    setUser(prev => ({
+      ...prev,
+      permissions: Object.keys(prev.permissions).reduce((acc, key) => {
+        acc[key as keyof AccountPermissions] = false;
+        return acc;
+      }, {} as AccountPermissions)
+    }))
+  }, [])
+
+  const enableAllPermissions = useCallback(() => {
+    setUser(prev => ({
+      ...prev,
+      permissions: Object.keys(prev.permissions).reduce((acc, key) => {
+        acc[key as keyof AccountPermissions] = true;
+        return acc;
+      }, {} as AccountPermissions)
+    }))
+  }, [])
+
   const handleSubmit = () => {
     axiosInstance.post("/users/new", {
       user: user
@@ -84,41 +107,41 @@ const NewUser = () => {
             <FaUserFriends size={18} /> Users
           </Link>
         </div>
-        
+
         <hr className="border-gray-600" />
-        
+
         <section className="flex flex-col gap-6 overflow-y-auto flex-1 p-2">
           {/* Basic Information */}
           <div className="space-y-4">
             <h2 className="text-xl text-white font-semibold">Basic Information</h2>
             <div className="grid grid-cols-1 gap-4">
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Username (Required)"
                 value={user.username}
                 onChange={(e) => handleInputChange('username', e.target.value)}
-                className="bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-500 focus:border-blue-400 focus:outline-none transition-colors placeholder-gray-400" 
+                className="bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-500 focus:border-blue-400 focus:outline-none transition-colors placeholder-gray-400"
               />
-              <input 
-                type="email" 
+              <input
+                type="email"
                 placeholder="Email"
                 value={user.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                className="bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-500 focus:border-blue-400 focus:outline-none transition-colors placeholder-gray-400" 
+                className="bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-500 focus:border-blue-400 focus:outline-none transition-colors placeholder-gray-400"
               />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Scope ( Ex: /foldername | Not required )"
                 value={user.scope}
                 onChange={(e) => handleInputChange('scope', e.target.value)}
-                className="bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-500 focus:border-blue-400 focus:outline-none transition-colors placeholder-gray-400" 
+                className="bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-500 focus:border-blue-400 focus:outline-none transition-colors placeholder-gray-400"
               />
-              <input 
-                type="password" 
+              <input
+                type="password"
                 placeholder="Password (Required)"
                 value={user.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
-                className="bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-500 focus:border-blue-400 focus:outline-none transition-colors placeholder-gray-400" 
+                className="bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-500 focus:border-blue-400 focus:outline-none transition-colors placeholder-gray-400"
               />
             </div>
           </div>
@@ -126,96 +149,128 @@ const NewUser = () => {
           {/* Permissions */}
           <div className="space-y-4">
             <h2 className="text-xl text-white font-semibold">Permissions</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-700 p-4 rounded-lg">
-              {/* File Operations */}
-              <div className="space-y-3">
-                <h3 className="text-lg text-gray-300 font-medium">File Operations</h3>
-                <PermissionToggle 
-                  label="Read Files"
-                  checked={user.permissions.read_files}
-                  onChange={(checked) => handlePermissionChange('read_files', checked)}
-                />
-                <PermissionToggle 
-                  label="Create Files"
-                  checked={user.permissions.create}
-                  onChange={(checked) => handlePermissionChange('create', checked)}
-                />
-                <PermissionToggle 
-                  label="Change Files"
-                  checked={user.permissions.change}
-                  onChange={(checked) => handlePermissionChange('change', checked)}
-                />
-                <PermissionToggle 
-                  label="Delete Files"
-                  checked={user.permissions.delete}
-                  onChange={(checked) => handlePermissionChange('delete', checked)}
-                />
-                <PermissionToggle 
-                  label="Upload Files"
-                  checked={user.permissions.upload_files}
-                  onChange={(checked) => handlePermissionChange('upload_files', checked)}
-                />
-                <PermissionToggle 
-                  label="Download Files"
-                  checked={user.permissions.download_files}
-                  onChange={(checked) => handlePermissionChange('download_files', checked)}
-                />
-              </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  enableAllPermissions()
+                }}
+                className="text-lg bg-gray-700 hover:bg-gray-600 p-2 px-10 rounded-lg">
+                Give all
+              </button>
+              <button
+                onClick={() => {
+                  disableAllPermissions()
+                }}
+                className="text-lg bg-gray-700 hover:bg-gray-600 p-2 px-10 rounded-lg">
+                Take all
+              </button>
 
-              {/* Advanced Operations */}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-lg">
+              {/* Read & View Access */}
               <div className="space-y-3">
-                <h3 className="text-lg text-gray-300 font-medium">Advanced Operations</h3>
-                <PermissionToggle 
-                  label="Move Files"
-                  checked={user.permissions.move}
-                  onChange={(checked) => handlePermissionChange('move', checked)}
-                />
-                <PermissionToggle 
-                  label="Rename Files"
-                  checked={user.permissions.rename}
-                  onChange={(checked) => handlePermissionChange('rename', checked)}
-                />
-                <PermissionToggle 
-                  label="Copy Files"
-                  checked={user.permissions.copy}
-                  onChange={(checked) => handlePermissionChange('copy', checked)}
-                />
-                <PermissionToggle 
-                  label="Extract Archives"
-                  checked={user.permissions.extract}
-                  onChange={(checked) => handlePermissionChange('extract', checked)}
-                />
-                <PermissionToggle 
+                <h3 className="flex items-center gap-2 text-lg text-gray-300 font-medium"><FaEye size={iconSize} />Read & View Access</h3>
+                <PermissionToggle
                   label="Read Directories"
                   checked={user.permissions.read_directories}
                   onChange={(checked) => handlePermissionChange('read_directories', checked)}
                 />
+                <PermissionToggle
+                  label="Read Files"
+                  checked={user.permissions.read_files}
+                  onChange={(checked) => handlePermissionChange('read_files', checked)}
+                />
               </div>
 
-              {/* System Operations */}
+              {/* File Transfer */}
               <div className="space-y-3">
-                <h3 className="text-lg text-gray-300 font-medium">System Operations</h3>
-                <PermissionToggle 
+                <h3 className="flex items-center gap-2 text-lg text-gray-300 font-medium"><FaDownload size={iconSize} />File Transfer</h3>
+                <PermissionToggle
+                  label="Download Files"
+                  checked={user.permissions.download_files}
+                  onChange={(checked) => handlePermissionChange('download_files', checked)}
+                />
+                <PermissionToggle
+                  label="Upload Files"
+                  checked={user.permissions.upload_files}
+                  onChange={(checked) => handlePermissionChange('upload_files', checked)}
+                />
+              </div>
+
+              {/* Content Modification */}
+              <div className="space-y-3">
+                <h3 className="flex items-center gap-2 text-lg text-gray-300 font-medium"><FaPen size={iconSize} />Content Modification</h3>
+                <PermissionToggle
+                  label="Create Items"
+                  checked={user.permissions.create}
+                  onChange={(checked) => handlePermissionChange('create', checked)}
+                />
+                <PermissionToggle
+                  label="Change Files"
+                  checked={user.permissions.change}
+                  onChange={(checked) => handlePermissionChange('change', checked)}
+                />
+                <PermissionToggle
+                  label="Rename Items"
+                  checked={user.permissions.rename}
+                  onChange={(checked) => handlePermissionChange('rename', checked)}
+                />
+                <PermissionToggle
+                  label="Delete Items"
+                  checked={user.permissions.delete}
+                  onChange={(checked) => handlePermissionChange('delete', checked)}
+                />
+              </div>
+
+              {/* File Organization */}
+              <div className="space-y-3">
+                <h3 className="flex items-center gap-2 text-lg text-gray-300 font-medium"><FaFile size={iconSize} />File Organization</h3>
+                <PermissionToggle
+                  label="Move Items"
+                  checked={user.permissions.move}
+                  onChange={(checked) => handlePermissionChange('move', checked)}
+                />
+                <PermissionToggle
+                  label="Copy Items"
+                  checked={user.permissions.copy}
+                  onChange={(checked) => handlePermissionChange('copy', checked)}
+                />
+                <PermissionToggle
+                  label="Extract Archives"
+                  checked={user.permissions.extract}
+                  onChange={(checked) => handlePermissionChange('extract', checked)}
+                />
+              </div>
+
+              {/* Recovery Management */}
+              <div className="space-y-3">
+                <h3 className="flex items-center gap-2 text-lg text-gray-300 font-medium"><FaArrowRotateLeft size={iconSize} />Recovery Management</h3>
+                <PermissionToggle
                   label="Read Recovery"
                   checked={user.permissions.read_recovery}
                   onChange={(checked) => handlePermissionChange('read_recovery', checked)}
                 />
-                <PermissionToggle 
+                <PermissionToggle
                   label="Use Recovery"
                   checked={user.permissions.use_recovery}
                   onChange={(checked) => handlePermissionChange('use_recovery', checked)}
                 />
-                <PermissionToggle 
+              </div>
+
+              {/* Administration */}
+              <div className="space-y-3">
+                <h3 className="flex items-center gap-2 text-lg text-gray-300 font-medium"><FaShieldAlt />Administration</h3>
+                <PermissionToggle
                   label="Read Users"
                   checked={user.permissions.read_users}
                   onChange={(checked) => handlePermissionChange('read_users', checked)}
                 />
-                <PermissionToggle 
+                <PermissionToggle
                   label="Edit Users"
                   checked={user.permissions.edit_users}
                   onChange={(checked) => handlePermissionChange('edit_users', checked)}
                 />
-                <PermissionToggle 
+                <PermissionToggle
                   label="Read Logs"
                   checked={user.permissions.read_logs}
                   onChange={(checked) => handlePermissionChange('read_logs', checked)}
