@@ -1,6 +1,6 @@
 tmp
 recovery_bin
-testdir/
+host/
 .gitignore
 .git
 .gitmodules
