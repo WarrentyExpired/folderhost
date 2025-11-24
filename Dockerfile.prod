@@ -21,7 +21,6 @@ FROM alpine:latest
 RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /app
 COPY --from=backend-builder /build/folderhost .
-RUN mkdir -p /app/recovery_bin /app/testdir
 EXPOSE 5000
 ENTRYPOINT ["./folderhost"]
 CMD []

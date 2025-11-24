@@ -5,10 +5,8 @@ services:
     ports:
       - "5000:5000"  # Change to match your config.yml port
     volumes:
-      - ./database.db:/app/database.db:z
-      - ./recovery_bin:/app/recovery_bin:z
-      - ./testdir:/app/host:z
-      - ./config.yml:/app/config.yml:z
+      - folderhost_data:/app
     restart: unless-stopped
-    environment:
-      - TZ=UTC  # Optional: set timezone
+    
+volumes:
+  folderhost_data:

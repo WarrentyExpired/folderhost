@@ -260,19 +260,13 @@ jobs:
           
           ### Docker
           ```bash
-          # Create necessary files and directories
-          touch config.yml database.db
-          mkdir -p recovery_bin testdir
-          
-          # Run container
+          # Run container, you can access the files using docker volumes
           docker run -d \
-            --name folderhost \
+            --name folderhost-server \
             -p 5000:5000 \
-            -v $(pwd)/config.yml:/app/config.yml \
-            -v $(pwd)/database.db:/app/database.db \
-            -v $(pwd)/recovery_bin:/app/recovery_bin \
-            -v $(pwd)/testdir:/app/testdir \
-            ${{ secrets.DOCKERHUB_USERNAME }}/folderhost:${{ needs.build-and-release.outputs.version }}
+            -v folderhost_data:/app \
+            --restart unless-stopped \
+            mertjsx/folderhost:latest
           ```
           
           ## ⚙️ Manual Configuration
