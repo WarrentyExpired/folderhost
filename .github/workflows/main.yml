@@ -23,6 +23,10 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      current_date: ${{ steps.date.outputs.current_date }}
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -136,29 +140,110 @@ jobs:
         echo "📊 Package sizes:"
         du -h ./release_packages/*
 
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-packages
+        path: ./release_packages/
+
+  build-docker:
+    runs-on: ubuntu-latest
+    needs: build-and-release
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ secrets.DOCKERHUB_USERNAME }}/folderhost
+        tags: |
+          type=raw,value=${{ needs.build-and-release.outputs.version }}
+          type=raw,value=latest
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./Dockerfile.prod
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        platforms: linux/amd64
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Docker image info
+      run: |
+        echo "🐋 Docker image pushed successfully!"
+        echo "📍 Image: ${{ secrets.DOCKERHUB_USERNAME }}/folderhost:${{ needs.build-and-release.outputs.version }}"
+        echo "📍 Latest: ${{ secrets.DOCKERHUB_USERNAME }}/folderhost:latest"
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [build-and-release, build-docker]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: release-packages
+        path: ./release_packages/
+
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ steps.version.outputs.version }}
-        name: Release ${{ steps.version.outputs.version }}
+        tag_name: ${{ needs.build-and-release.outputs.version }}
+        name: Release ${{ needs.build-and-release.outputs.version }}
         body: |
-          🚀 **Folderhost Release ${{ steps.version.outputs.version }}**
+          🚀 **Folderhost Release ${{ needs.build-and-release.outputs.version }}**
           
-          📅 Release Date: ${{ steps.date.outputs.current_date }}
+          📅 Release Date: ${{ needs.build-and-release.outputs.current_date }}
           
           ## 📦 Downloads
           
           | Platform | Download | Description |
           |----------|----------|-------------|
-          | 🐧 Linux | [`folderhost-linux-amd64.zip`](https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.version }}/folderhost-linux-amd64.zip) | Linux x86_64 binary |
-          | 🪟 Windows | [`folderhost-windows-amd64.zip`](https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.version }}/folderhost-windows-amd64.zip) | Windows x86_64 executable |
+          | 🐧 Linux | [`folderhost-linux-amd64.zip`](https://github.com/${{ github.repository }}/releases/download/${{ needs.build-and-release.outputs.version }}/folderhost-linux-amd64.zip) | Linux x86_64 binary |
+          | 🪟 Windows | [`folderhost-windows-amd64.zip`](https://github.com/${{ github.repository }}/releases/download/${{ needs.build-and-release.outputs.version }}/folderhost-windows-amd64.zip) | Windows x86_64 executable |
+          | 🐋 Docker | `docker pull ${{ secrets.DOCKERHUB_USERNAME }}/folderhost:${{ needs.build-and-release.outputs.version }}` | Docker image |
+          
+          ## 🐋 Docker Usage
+          
+          ```bash
+          # Pull the image
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/folderhost:${{ needs.build-and-release.outputs.version }}
+          
+          # Or use latest
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/folderhost:latest
+          
+          # Run with docker-compose
+          # Download docker-compose.prod.yml from repository
+          docker-compose -f docker-compose.prod.yml up -d
+          ```
+          
+          **Important:** The application will use port 5000 by default, but you can change this in `config.yml` and update the port mapping in `docker-compose.prod.yml` accordingly.
           
           ## 🔧 Quick Start
           
           ### Linux
           ```bash
           # Download and extract
-          wget https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.version }}/folderhost-linux-amd64.zip
+          wget https://github.com/${{ github.repository }}/releases/download/${{ needs.build-and-release.outputs.version }}/folderhost-linux-amd64.zip
           unzip folderhost-linux-amd64.zip
           chmod +x folderhost
           
@@ -173,12 +258,30 @@ jobs:
           folderhost.exe # Or just double click
           ```
           
-          ## ⚙️ Configuration
+          ### Docker
+          ```bash
+          # Create necessary files and directories
+          touch config.yml database.db
+          mkdir -p recovery_bin testdir
           
-          1. Extract the downloaded archive
+          # Run container
+          docker run -d \
+            --name folderhost \
+            -p 5000:5000 \
+            -v $(pwd)/config.yml:/app/config.yml \
+            -v $(pwd)/database.db:/app/database.db \
+            -v $(pwd)/recovery_bin:/app/recovery_bin \
+            -v $(pwd)/testdir:/app/testdir \
+            ${{ secrets.DOCKERHUB_USERNAME }}/folderhost:${{ needs.build-and-release.outputs.version }}
+          ```
+          
+          ## ⚙️ Manual Configuration
+          
+          1. Extract the downloaded archive (for binary installations)
           2. Run the application once to generate `config.yml`
-          3. Edit `config.yml` to customize settings
-          4. Restart the application
+          3. Edit `config.yml` to customize settings (especially the port if needed)
+          4. For Docker: Update the port mapping in `docker-compose.prod.yml` if you changed the port in `config.yml`
+          5. Restart the application
           
           ---
           
@@ -194,5 +297,6 @@ jobs:
 
     - name: Release summary
       run: |
-        echo "🎉 Release ${{ steps.version.outputs.version }} created successfully!"
-        echo "📍 URL: https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.version }}"
+        echo "🎉 Release ${{ needs.build-and-release.outputs.version }} created successfully!"
+        echo "📍 URL: https://github.com/${{ github.repository }}/releases/tag/${{ needs.build-and-release.outputs.version }}"
+        echo "🐋 Docker: ${{ secrets.DOCKERHUB_USERNAME }}/folderhost:${{ needs.build-and-release.outputs.version }}"
