@@ -1,0 +1,14 @@
+services:
+  folderhost:
+    image: mertjsx/folderhost:latest
+    container_name: folderhost-server
+    ports:
+      - "5000:5000"  # Change to match your config.yml port
+    volumes:
+      - ./database.db:/app/database.db:z
+      - ./recovery_bin:/app/recovery_bin:z
+      - ./testdir:/app/host:z
+      - ./config.yml:/app/config.yml:z
+    restart: unless-stopped
+    environment:
+      - TZ=UTC  # Optional: set timezone
