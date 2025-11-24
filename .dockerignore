@@ -8,7 +8,4 @@ host/
 Dockerfile
 docker-compose.yml
 web/node_modules
-web/dist
-web/*
-!web/dist
-!web/dist/**
+debug
