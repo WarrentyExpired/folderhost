@@ -48,6 +48,17 @@
 
 [![Download Latest Release](https://img.shields.io/github/v/release/MertJSX/folderhost?style=for-the-badge&logo=github&label=Download&color=2ea44f)](https://github.com/MertJSX/folderhost/releases/latest)
 
+### 🐳 Docker
+```bash
+# Run container, you can access the files using docker volumes
+  docker run -d \
+    --name folderhost-server \
+    -p 5000:5000 \
+    -v folderhost_data:/app \
+    --restart unless-stopped \
+    mertjsx/folderhost:latest
+```
+
 ### 🪟 Windows
 ```powershell
 # Download the .exe, then:
