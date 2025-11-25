@@ -257,14 +257,15 @@ const Logs: React.FC = () => {
                                 Load More Logs
                             </button>
                         </div>
-                    ) : <div className="flex justify-center mt-4">
+                    ) : filteredLogs.length < 0 && 
+                    (<div className="flex justify-center mt-4">
                             <button
                                 disabled
                                 className="flex items-center gap-2 text-white font-semibold py-2 px-6 rounded transition-colors"
                             >
                                 No more items to load
                             </button>
-                        </div>}
+                    </div>)}
                 </section>
             </main>
         </div>

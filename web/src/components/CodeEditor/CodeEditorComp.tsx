@@ -422,15 +422,19 @@ const CodeEditorComp: React.FC<CodeEditorCompProps> = ({
                     <option value="javascript">JavaScript</option>
                     <option value="typescript">TypeScript</option>
                     <option value="html">HTML</option>
+                    <option value="xml">XML</option>
+                    <option value="json">JSON</option>
+                    <option value="yaml">YAML</option>
                     <option value="css">CSS</option>
                     <option value="php">PHP</option>
-                    <option value="yaml">YAML</option>
-                    <option value="json">JSON</option>
-                    <option value="xml">XML</option>
                     <option value="python">Python</option>
                     <option value="java">Java</option>
+                    <option value="kotlin">Kotlin</option>
                     <option value="cpp">C++</option>
+                    <option value="csharp">C#</option>
                     <option value="sql">SQL</option>
+                    <option value="shell">Shell</option>
+                    <option value="bat">Batch</option>
                     <option value="plaintext">Plain Text</option>
                   </select>
                 </div>
@@ -445,7 +449,7 @@ const CodeEditorComp: React.FC<CodeEditorCompProps> = ({
                     <input
                       type="range"
                       min="10"
-                      max="30"
+                      max="32"
                       value={editorFontSize}
                       onChange={(e) => {
                         const value = parseInt(e.target.value, 10);

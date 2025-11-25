@@ -122,6 +122,25 @@ const EditUser = () => {
         })
     }, [user])
 
+    const hasChanges = useCallback(() => {
+        if (!memUser) return false;
+
+        if (memUser.username !== user.username ||
+            memUser.email !== user.email ||
+            memUser.scope !== user.scope) {
+            return true;
+        }
+
+        const permissionKeys = Object.keys(user.permissions) as (keyof AccountPermissions)[];
+        for (const key of permissionKeys) {
+            if (memUser.permissions[key] !== user.permissions[key]) {
+                return true;
+            }
+        }
+
+        return false;
+    }, [memUser, user]);
+
     return (
         <div>
             <MessageBox message={error !== "" ? error : ""} isErr={error !== ""} setMessage={setError} />
@@ -307,7 +326,7 @@ const EditUser = () => {
                 <div className="flex justify-center gap-2 pt-4 border-t border-gray-600">
                     <button
                         onClick={handleSubmit}
-                        disabled={(!user.username || !user.password) || (memUser == user)}
+                        disabled={!user.username || !hasChanges()}
                         className="bg-green-700 hover:bg-green-600 disabled:bg-gray-500 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 w-2/3"
                     >
                         Submit Changes
