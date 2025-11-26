@@ -10,7 +10,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func EditUser(c *fiber.Ctx) error {
+func ChangeUserPassword(c *fiber.Ctx) error {
 	if !c.Locals("account").(types.Account).Permissions.EditUsers {
 		return c.Status(403).JSON(
 			fiber.Map{"err": "No permission!"},
@@ -18,7 +18,8 @@ func EditUser(c *fiber.Ctx) error {
 	}
 
 	var requestBody struct {
-		User types.Account `json:"user"`
+		User     types.Account `json:"user"`
+		Password string        `json:"password"`
 	}
 
 	if err := c.BodyParser(&requestBody); err != nil {
@@ -47,7 +48,7 @@ func EditUser(c *fiber.Ctx) error {
 		)
 	}
 
-	err = users.UpdateUser(*requestBody.User.ID, &requestBody.User)
+	err = users.UpdateUserPassword(*requestBody.User.ID, requestBody.Password)
 
 	if err != nil {
 		return c.Status(500).JSON(
@@ -61,11 +62,11 @@ func EditUser(c *fiber.Ctx) error {
 
 	logs.CreateLog(types.AuditLog{
 		Username:    c.Locals("account").(types.Account).Username,
-		Action:      "Edit user",
-		Description: fmt.Sprintf("%s modified user %s", c.Locals("account").(types.Account).Username, requestBody.User.Username),
+		Action:      "Change Pass",
+		Description: fmt.Sprintf("%s changed password of %s", c.Locals("account").(types.Account).Username, requestBody.User.Username),
 	})
 
 	return c.Status(200).JSON(
-		fiber.Map{"response": "User successfully edited!"},
+		fiber.Map{"response": "User password changed successfully!"},
 	)
 }

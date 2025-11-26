@@ -170,6 +170,10 @@ func main() {
 		return routes.EditUser(c)
 	})
 
+	app.Put("/api/users/change-password", func(c *fiber.Ctx) error {
+		return routes.ChangeUserPassword(c)
+	})
+
 	app.Post("/api/users/new", func(c *fiber.Ctx) error {
 		return routes.CreateUser(c)
 	})

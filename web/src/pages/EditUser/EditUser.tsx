@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useCallback } from "react"
 import { FaEye, FaDownload, FaFile, FaPen, FaShieldAlt } from "react-icons/fa";
 import { FaArrowRotateLeft } from "react-icons/fa6";
+import ChangeUserPassword from "../../components/minimal/ChangeUserPassword/ChangeUserPassword"
 
 const EditUser = () => {
     const params = useParams();
@@ -17,6 +18,7 @@ const EditUser = () => {
     const username = params.username;
     const [error, setError] = useState<string>("");
     const [memUser, setMemUser] = useState<Account | null>(null)
+    const [showChangePassMenu, setShowChangePassMenu] = useState<boolean>(false)
     const iconSize = 22;
     const [user, setUser] = useState<Account>({
         id: 1,
@@ -144,6 +146,7 @@ const EditUser = () => {
     return (
         <div>
             <MessageBox message={error !== "" ? error : ""} isErr={error !== ""} setMessage={setError} />
+            <ChangeUserPassword show={showChangePassMenu} setShow={setShowChangePassMenu} user={user} />
             <section className="my-10 flex flex-col bg-gray-800 gap-6 md:w-4/5 mx-auto p-6 max-w-[1000px] min-h-[600px] shadow-2xl rounded-lg">
                 <div className="flex justify-between items-center">
                     <h1 className="flex text-3xl items-center gap-3 text-white font-semibold">
@@ -185,6 +188,14 @@ const EditUser = () => {
                                 onChange={(e) => handleInputChange('scope', e.target.value)}
                                 className="bg-gray-700 text-white px-4 py-3 rounded-lg border border-gray-500 focus:border-blue-400 focus:outline-none transition-colors placeholder-gray-400"
                             />
+                            <button
+                                onClick={() => {
+                                    setShowChangePassMenu((prev) => !prev)
+                                }}
+                                className="text-lg bg-sky-700 hover:bg-sky-600 p-2 px-10 rounded-lg">
+                                Change Password
+                            </button>
+
                         </div>
                     </div>
 
