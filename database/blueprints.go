@@ -23,6 +23,7 @@ func CreateUsersTable() {
         	upload_permission BOOLEAN DEFAULT FALSE,
         	rename_permission BOOLEAN DEFAULT FALSE,
         	extract_permission BOOLEAN DEFAULT FALSE,
+			archive_permission BOOLEAN DEFAULT FALSE,
         	copy_permission BOOLEAN DEFAULT FALSE,
 			logs_permission BOOLEAN DEFAULT FALSE,
 			read_recovery_permission BOOLEAN DEFAULT FALSE,

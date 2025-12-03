@@ -20,6 +20,7 @@ type AccountPermissions struct {
 	UploadFiles     bool `yaml:"upload" json:"upload_files"`
 	Rename          bool `yaml:"rename" json:"rename"`
 	Extract         bool `yaml:"extract" json:"extract"`
+	Archive         bool `yaml:"archive" json:"archive"`
 	Copy            bool `yaml:"copy" json:"copy"`
 	ReadRecovery    bool `yaml:"read_recovery" json:"read_recovery"`
 	UseRecovery     bool `yaml:"use_recovery" json:"use_recovery"`

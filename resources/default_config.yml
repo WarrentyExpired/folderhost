@@ -39,6 +39,7 @@ admin:
     upload: true
     rename: true
     extract: true
+    archive: true
     copy: true
     read_recovery: true
     use_recovery: true

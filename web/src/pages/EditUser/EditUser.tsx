@@ -37,6 +37,7 @@ const EditUser = () => {
             upload_files: false,
             rename: false,
             extract: false,
+            archive: false,
             copy: false,
             read_recovery: false,
             use_recovery: false,

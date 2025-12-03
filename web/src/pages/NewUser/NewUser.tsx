@@ -30,6 +30,7 @@ const NewUser = () => {
       upload_files: false,
       rename: false,
       extract: false,
+      archive: false,
       copy: false,
       read_recovery: true,
       use_recovery: false,

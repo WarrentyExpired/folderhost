@@ -9,6 +9,7 @@ export interface AccountPermissions {
     upload_files: boolean,
     rename: boolean,
     extract: boolean,
+    archive: boolean,
     copy: boolean,
     read_recovery: boolean,
     use_recovery: boolean,
