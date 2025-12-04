@@ -42,5 +42,8 @@ export interface ExplorerContextType {
         showRenameItemMenu: boolean,
         setShowRenameItemMenu: React.Dispatch<React.SetStateAction<boolean>>,
         disableCaching: boolean,
-        setDisableCaching: React.Dispatch<React.SetStateAction<boolean>>
+        setDisableCaching: React.Dispatch<React.SetStateAction<boolean>>,
+        startZipping: Function,
+        zipProgress: string,
+        zipping: boolean
 }

@@ -11,9 +11,23 @@ const ItemInfo = () => {
   const renameInput = useRef<HTMLInputElement>(null)
   const logoSize = 75;
   const {
-    itemInfo, setItemInfo, renameItem, downloadFile, downloadProgress, deleteItem, createCopy, path, createItem, unzipProgress, permissions, showDisabled, startUnzipping, directoryInfo
+    itemInfo,
+    setItemInfo,
+    renameItem,
+    downloadFile,
+    downloadProgress,
+    deleteItem,
+    createCopy,
+    path,
+    unzipProgress,
+    permissions,
+    showDisabled,
+    startUnzipping,
+    directoryInfo,
+    zipProgress,
+    startZipping
   } = useContext<ExplorerContextType>(ExplorerContext)
-  
+
   const [imageData, setImageData] = useState("")
   const [imageLoading, setImageLoading] = useState(false)
   const [imageError, setImageError] = useState(false)
@@ -21,7 +35,7 @@ const ItemInfo = () => {
   const fetchImage = async () => {
     setImageLoading(true)
     setImageError(false)
-    
+
     try {
       let imgPath = itemInfo?.path;
 
@@ -39,7 +53,7 @@ const ItemInfo = () => {
       })
 
       const blob = response.data;
-      
+
       const base64Data = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
@@ -48,7 +62,7 @@ const ItemInfo = () => {
       });
 
       setImageData(base64Data as string);
-      
+
     } catch (error) {
       setImageError(true)
     } finally {
@@ -76,12 +90,12 @@ const ItemInfo = () => {
                   <span className="text-gray-400">Loading...</span>
                 </div>
               )}
-              
+
               {!imageLoading && !imageError && imageData && (
-                <img 
+                <img
                   src={imageData}
-                  alt={itemInfo?.name || ''} 
-                  width={300} 
+                  alt={itemInfo?.name || ''}
+                  width={300}
                   onError={() => setImageError(true)}
                   className="max-w-[200px] max-h-[200px] object-contain"
                 />
@@ -255,7 +269,6 @@ const ItemInfo = () => {
 
             }
           </div>
-
         ) :
           <div className="flex flex-col gap-2 w-5/6">
             {
@@ -276,6 +289,26 @@ const ItemInfo = () => {
                     title='No permission to delete!'
                     disabled
                   >Delete directory</button> : null
+            }
+            {itemInfo?.path !== "./" && zipProgress === "" ?
+              (permissions?.archive ?
+                <button
+                  className='bg-yellow-600 px-6 font-bold rounded-xl'
+                  title='Click to zip.'
+                  onClick={() => {
+                    startZipping()
+                  }}
+                >Zip</button> : showDisabled === true ?
+                  <button
+                    className='bg-yellow-600 px-6 font-bold rounded-xl opacity-50'
+                    title='No permission!'
+                    disabled
+                  >Zip</button> : null)
+              : itemInfo?.path !== "./" && zipProgress !== "" ?
+                <div>
+                  <h1 className='text-center'>Zipping...</h1>
+                  <h1 className='text-center text-xl'>Progress: <span className='text-sky-300'>{zipProgress}</span></h1>
+                </div> : null
             }
             {
               itemInfo?.path !== "./" && permissions?.copy && itemInfo?.path !== "./" && itemInfo.path !== directoryInfo?.path ?

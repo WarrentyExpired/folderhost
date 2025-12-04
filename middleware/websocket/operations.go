@@ -32,3 +32,26 @@ func HandleUnzip(c *websocket.Conn, mt int, message types.EditorChange) {
 		c.WriteMessage(mt, unzipProgress)
 	})
 }
+
+func HandleZip(c *websocket.Conn, mt int, message types.EditorChange) {
+	var account types.Account = c.Locals("account").(types.Account)
+
+	src := config.Config.GetScopedFolder(account.Scope) + message.Path
+	baseDest := fmt.Sprintf("%s%s/%s", config.Config.GetScopedFolder(account.Scope), utils.GetParentPath(message.Path), utils.GetPureFileName(message.Path))
+	dest := baseDest + ".zip"
+
+	for index := 1; utils.IsExistingPath(dest); index++ {
+		dest = fmt.Sprintf("%s (%d).zip", baseDest, index)
+	}
+
+	utils.Zip(src, dest, func(totalSize int64, isCompleted bool, abortMsg string) {
+		zipProgress, _ := json.Marshal(fiber.Map{
+			"type":        "zip-progress",
+			"totalSize":   utils.ConvertBytesToString(totalSize),
+			"isCompleted": isCompleted,
+			"abortMsg":    abortMsg,
+		})
+
+		c.WriteMessage(mt, zipProgress)
+	})
+}

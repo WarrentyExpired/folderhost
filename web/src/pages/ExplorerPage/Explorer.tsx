@@ -32,6 +32,7 @@ const ExplorerPage: React.FC = () => {
   const [error, setError] = useState<string>("");
   const [downloadProgress, setDownloadProgress] = useState<number>(0);
   const [unzipProgress, setUnzipProgress] = useState<string>(""); // formatted unzip size (2.5 GB for example)
+  const [zipProgress, setZipProgress] = useState<string>(""); // formatted zip size (2.5 GB for example)
   const [messageBoxMsg, setMessageBoxMsg] = useState<string>("")
   const [messageBoxIsErr, setMessageBoxIsErr] = useState(false)
   const scrollIndex = useRef<number>(0)
@@ -47,6 +48,7 @@ const ExplorerPage: React.FC = () => {
   // Work states
   const [downloading, setDownloading] = useState(false);
   const [unzipping, setUnzipping] = useState(false);
+  const [zipping, setZipping] = useState(false);
   const [waitingResponse, setWaitingResponse] = useState(false);
 
   const {
@@ -112,6 +114,21 @@ const ExplorerPage: React.FC = () => {
             setUnzipProgress("")
             setUnzipping(false)
             setRes("Unzip completed successfully!")
+          }
+          break;
+        case "zip-progress":
+          setZipProgress(message.totalSize ?? "")
+          if (message.abortMsg) {
+            readDir()
+            setZipProgress("")
+            setZipping(false)
+            setError(message.abortMsg)
+          }
+          if (message.isCompleted) {
+            readDir()
+            setZipProgress("")
+            setZipping(false)
+            setRes("Zip completed successfully!")
           }
           break;
         case "directory-update":
@@ -392,7 +409,7 @@ const ExplorerPage: React.FC = () => {
   }
 
   function startUnzipping(): void {
-    if (downloading || waitingResponse || unzipping) {
+    if (downloading || waitingResponse || unzipping || zipping) {
       waitPreviousAction();
       return
     }
@@ -400,6 +417,20 @@ const ExplorerPage: React.FC = () => {
       setUnzipping(true);
       sendMessage(JSON.stringify({
         type: "unzip",
+        path: itemInfo?.path.slice(1)
+      }))
+    }
+  }
+
+  function startZipping(): void {
+    if (downloading || waitingResponse || unzipping || zipping) {
+      waitPreviousAction();
+      return
+    }
+    if (socket !== null) {
+      setZipping(true);
+      sendMessage(JSON.stringify({
+        type: "zip",
         path: itemInfo?.path.slice(1)
       }))
     }
@@ -445,7 +476,10 @@ const ExplorerPage: React.FC = () => {
     showRenameItemMenu: showRenameItemMenu,
     setShowRenameItemMenu: setShowRenameItemMenu,
     disableCaching: disableCaching,
-    setDisableCaching: setDisableCaching
+    setDisableCaching: setDisableCaching,
+    startZipping: startZipping,
+    zipProgress: zipProgress,
+    zipping: zipping
   };
 
   return (

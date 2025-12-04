@@ -294,6 +294,11 @@ const EditUser = () => {
                                     checked={user.permissions.extract}
                                     onChange={(checked) => handlePermissionChange('extract', checked)}
                                 />
+                                <PermissionToggle
+                                    label="Archive Folders"
+                                    checked={user.permissions.archive}
+                                    onChange={(checked) => handlePermissionChange('archive', checked)}
+                                />
                             </div>
 
                             {/* Recovery Management */}

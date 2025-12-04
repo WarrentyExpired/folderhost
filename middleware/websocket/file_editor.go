@@ -83,6 +83,24 @@ func processWebSocketMessage(msg []byte, filePath string, c *websocket.Conn, mt 
 		})
 
 		HandleUnzip(c, mt, message)
+	case "zip":
+		if !account.Permissions.Archive {
+			permissionError, _ := json.Marshal(fiber.Map{
+				"type":  "error",
+				"error": "You don't have permission to zip!",
+			})
+
+			c.WriteMessage(mt, permissionError)
+			return nil // Server doesn't care about permission errors
+		}
+
+		logs.CreateLog(types.AuditLog{
+			Username:    account.Username,
+			Action:      "Archive file",
+			Description: fmt.Sprintf("%s started zipping %s file.", account.Username, message.Path),
+		})
+
+		HandleZip(c, mt, message)
 	}
 
 	return nil
