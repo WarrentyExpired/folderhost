@@ -6,6 +6,8 @@ web:
 docker:
 	docker compose build
 	docker compose up
+test-server:
+	go run gotest.tools/gotestsum@latest --format testname ./test/
 # Use mingw for to take Windows build. The other versions won't work :/
 build:
 	cd web && npm run build
