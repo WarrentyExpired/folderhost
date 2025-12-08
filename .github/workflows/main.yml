@@ -103,6 +103,14 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
+    
+    - name: Install test dependencies
+      run: |
+        go install gotest.tools/gotestsum@latest
+    
+    - name: Run Go tests
+      run: |
+        make test-server
 
     - name: Install Mingw for Windows cross-compilation
       run: |
