@@ -6,6 +6,14 @@ host/
 .gitmodules
 .dockerignore
 Dockerfile
+Dockerfile.prod
 docker-compose.yml
+docker-compose.prod.yml
 web/node_modules
 debug
+.github
+README.md
+SECURITY.md
+Makefile
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
