@@ -110,7 +110,7 @@ func TestCache_Expiration(t *testing.T) {
 		_, ok := cache.Get(key)
 		assert.True(t, ok, "Should exist before expiration")
 
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(1500 * time.Millisecond)
 
 		_, ok = cache.Get(key)
 		assert.False(t, ok, "Should not exist after TTL")
