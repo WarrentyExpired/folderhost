@@ -25,6 +25,11 @@ func HandleWebsocket(c *websocket.Conn) {
 	}
 
 	config := &config.Config
+
+	if path == "/" {
+		path = ""
+	}
+
 	path = config.GetScopedFolder(account.Scope) + path
 
 	if !utils.IsSafePath(path) {

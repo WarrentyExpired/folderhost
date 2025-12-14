@@ -5,16 +5,16 @@ import (
 	"time"
 )
 
-type Cache[KeyType int | string, DataType any] struct {
+type Cache[KeyType comparable, DataType any] struct {
 	Items             map[KeyType]CacheItem[DataType]
 	Mutex             sync.RWMutex
 	Ticker            *time.Ticker
-	SetCacheEvent     chan KeyType // index
+	SetCacheEvent     chan KeyType
 	TimeoutCacheEvent chan CacheEvent[KeyType, DataType]
 	Properties        CacheProperties
 }
 
-type CacheEvent[KeyType int | string, DataType any] struct {
+type CacheEvent[KeyType comparable, DataType any] struct {
 	Key  KeyType
 	Data DataType
 }
@@ -27,4 +27,9 @@ type CacheItem[DataType any] struct {
 type CacheProperties struct {
 	SetCacheEvent     bool
 	TimeoutCacheEvent bool
+}
+
+type DirectoryCacheKey struct {
+	Path  string
+	Scope string
 }

@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-func CreateCache[KeyType string | int, DataType any](cleanupInterval time.Duration, properties CacheProperties) *Cache[KeyType, DataType] {
+func CreateCache[KeyType comparable, DataType any](cleanupInterval time.Duration, properties CacheProperties) *Cache[KeyType, DataType] {
 	cache := &Cache[KeyType, DataType]{
 		Items: make(map[KeyType]CacheItem[DataType]),
 	}

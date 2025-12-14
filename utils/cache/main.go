@@ -13,7 +13,8 @@ var SessionCache *Cache[string, types.Account] = CreateCache[string, types.Accou
 	SetCacheEvent:     false,
 	TimeoutCacheEvent: false,
 })
-var DirectoryCache *Cache[string, types.ReadDirCache] = CreateCache[string, types.ReadDirCache](30*time.Second, CacheProperties{
+
+var DirectoryCache *Cache[DirectoryCacheKey, types.ReadDirCache] = CreateCache[DirectoryCacheKey, types.ReadDirCache](30*time.Second, CacheProperties{
 	SetCacheEvent:     true,
 	TimeoutCacheEvent: false,
 })
@@ -34,6 +35,6 @@ func ListenDirectorySetCacheEvents() {
 	})
 
 	for key := range DirectoryCache.SetCacheEvent {
-		utils.SendToAll(key, 1, msg)
+		utils.SendToAll(key.Path, 1, msg)
 	}
 }

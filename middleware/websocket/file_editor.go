@@ -39,7 +39,7 @@ func processWebSocketMessage(msg []byte, filePath string, c *websocket.Conn, mt 
 		utils.ScheduleDebouncedLog(account.Username, filePath)
 
 		utils.SendToAllExclude(filePath, mt, msg, c)
-		return applyEditorChange(filePath, message.Change)
+		return applyEditorChange(filePath, message.Change, &account)
 	case "change-path":
 		if !account.Permissions.ReadDirectories {
 			permissionError, _ := json.Marshal(fiber.Map{
@@ -106,7 +106,7 @@ func processWebSocketMessage(msg []byte, filePath string, c *websocket.Conn, mt 
 	return nil
 }
 
-func applyEditorChange(filePath string, change types.ChangeData) error {
+func applyEditorChange(filePath string, change types.ChangeData, account *types.Account) error {
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		return err
@@ -124,11 +124,11 @@ func applyEditorChange(filePath string, change types.ChangeData) error {
 
 	switch change.Type {
 	case "insert":
-		return applyInsert(filePath, lines, startLine, startCol, change.Text)
+		return applyInsert(filePath, lines, startLine, startCol, change.Text, account)
 	case "delete":
-		return applyDelete(filePath, lines, startLine, startCol, endLine, endCol)
+		return applyDelete(filePath, lines, startLine, startCol, endLine, endCol, account)
 	case "replace":
-		return applyReplace(filePath, lines, startLine, startCol, endLine, endCol, change.Text)
+		return applyReplace(filePath, lines, startLine, startCol, endLine, endCol, change.Text, account)
 	default:
 		return nil
 	}
@@ -148,7 +148,7 @@ func adjustUTF8Position(lines []string, lineNum, col int) int {
 	return col
 }
 
-func applyInsert(filePath string, lines []string, lineNum, col int, text string) error {
+func applyInsert(filePath string, lines []string, lineNum, col int, text string, account *types.Account) error {
 	if lineNum < 0 || lineNum >= len(lines) {
 		return fmt.Errorf("line number out of range: %d", lineNum)
 	}
@@ -169,10 +169,10 @@ func applyInsert(filePath string, lines []string, lineNum, col int, text string)
 	newRunes = append(newRunes, runes[col:]...)
 
 	lines[lineNum] = string(newRunes)
-	return writeFile(filePath, lines)
+	return writeFile(filePath, lines, account)
 }
 
-func applyDelete(filePath string, lines []string, startLine, startCol, endLine, endCol int) error {
+func applyDelete(filePath string, lines []string, startLine, startCol, endLine, endCol int, account *types.Account) error {
 	if startLine < 0 || startLine >= len(lines) || endLine < 0 || endLine >= len(lines) {
 		return fmt.Errorf("line numbers out of range: %d-%d", startLine, endLine)
 	}
@@ -211,10 +211,10 @@ func applyDelete(filePath string, lines []string, startLine, startCol, endLine, 
 		}
 	}
 
-	return writeFile(filePath, lines)
+	return writeFile(filePath, lines, account)
 }
 
-func applyReplace(filePath string, lines []string, startLine, startCol, endLine, endCol int, text string) error {
+func applyReplace(filePath string, lines []string, startLine, startCol, endLine, endCol int, text string, account *types.Account) error {
 	if startLine == endLine {
 		line := lines[startLine]
 		runes := []rune(line)
@@ -251,10 +251,10 @@ func applyReplace(filePath string, lines []string, startLine, startCol, endLine,
 		}
 	}
 
-	return writeFile(filePath, lines)
+	return writeFile(filePath, lines, account)
 }
 
-func writeFile(filepath string, lines []string) error {
+func writeFile(filepath string, lines []string, account *types.Account) error {
 	content := strings.Join(lines, "\n")
 
 	if len(content) > 200*1024 {
@@ -293,12 +293,20 @@ func writeFile(filepath string, lines []string) error {
 
 	cache.EditorWatcherCache.SetWithoutTTL(filepath, watcherCache)
 
-	if directoryCache, ok := cache.DirectoryCache.Get(utils.GetParentPath(filepath) + "/"); ok {
+	// That's not the best way to update caches. Because not all scopes will be updated.
+	// The problem is that if we update all directory caches on every writeFile call it will not be good for performance I think...
+	if directoryCache, ok := cache.DirectoryCache.Get(cache.DirectoryCacheKey{
+		Path:  utils.GetParentPath(filepath) + "/",
+		Scope: account.Scope,
+	}); ok {
 		for index, v := range directoryCache.Items {
 			v.SizeBytes = fileStat.Size()
 			directoryCache.Items[index] = v
 		}
-		cache.DirectoryCache.Set(utils.GetParentPath(filepath)+"/", directoryCache, 600)
+		cache.DirectoryCache.Set(cache.DirectoryCacheKey{
+			Path:  utils.GetParentPath(filepath) + "/",
+			Scope: account.Scope,
+		}, directoryCache, 600)
 	}
 	return nil
 }

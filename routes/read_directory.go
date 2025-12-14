@@ -32,6 +32,11 @@ func ReadDirectory(c *fiber.Ctx) error {
 	}
 
 	config := &config.Config
+
+	if path == "/" {
+		path = ""
+	}
+
 	var dirPath string = fmt.Sprintf("%s%s", config.GetScopedFolder(scope), path)
 	directoryData, err := os.Stat(dirPath)
 	var pathCacheName string = dirPath
@@ -54,11 +59,14 @@ func ReadDirectory(c *fiber.Ctx) error {
 		)
 	}
 
-	dirCache, ok := cache.DirectoryCache.Get(pathCacheName)
+	dirCache, ok := cache.DirectoryCache.Get(cache.DirectoryCacheKey{
+		Path:  pathCacheName,
+		Scope: scope,
+	})
 
 	if ok && dirCache.DirectoryInfo.DateModified != directoryData.ModTime() {
 		if ok {
-			cache.DirectoryCache.Delete(pathCacheName)
+			cache.DirectoryCache.DeleteDirCacheItemsByPath(pathCacheName)
 		}
 		ok = false
 	}
@@ -115,13 +123,19 @@ func ReadDirectory(c *fiber.Ctx) error {
 	directoryInfo.Id = -1
 
 	if caching == "false" {
-		cache.DirectoryCache.SetWithoutEventTriggering(pathCacheName, types.ReadDirCache{
+		cache.DirectoryCache.SetWithoutEventTriggering(cache.DirectoryCacheKey{
+			Path:  pathCacheName,
+			Scope: scope,
+		}, types.ReadDirCache{
 			Items:         data,
 			DirectoryInfo: directoryInfo,
 			StorageInfo:   mode == "Quality mode",
 		}, 600*time.Second)
 	} else {
-		cache.DirectoryCache.Set(pathCacheName, types.ReadDirCache{
+		cache.DirectoryCache.Set(cache.DirectoryCacheKey{
+			Path:  pathCacheName,
+			Scope: scope,
+		}, types.ReadDirCache{
 			Items:         data,
 			DirectoryInfo: directoryInfo,
 			StorageInfo:   mode == "Quality mode",
