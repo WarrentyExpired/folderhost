@@ -95,7 +95,7 @@ func ReadDirectory(c *fiber.Ctx) error {
 
 	cleanedPath := filepath.Clean(trimmedPath())
 	folderName := filepath.Base(cleanedPath)
-	dirPath = utils.ReplacePathPrefix(dirPath, fmt.Sprintf("%s/", config.GetScopedFolder(scope)))
+	dirPath = utils.ReplacePathPrefix(dirPath, config.GetScopedFolder(scope))
 
 	directoryInfo := types.DirectoryItem{
 		Name:         folderName,
