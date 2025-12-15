@@ -290,7 +290,7 @@ const ItemInfo = () => {
                     disabled
                   >Delete directory</button> : null
             }
-            {itemInfo?.path !== "./" && zipProgress === "" ?
+            {itemInfo?.path !== "./" && itemInfo?.path !== directoryInfo?.path && zipProgress === "" ?
               (permissions?.archive ?
                 <button
                   className='bg-yellow-600 px-6 font-bold rounded-xl'
@@ -336,11 +336,11 @@ const ItemInfo = () => {
                         title='Click to upload.'
                         target='_blank' rel="noreferrer"
                         href={`/upload/${encodeURIComponent(itemInfo.path)}`}
-                      >Upload new file</a> : showDisabled === true ?
+                      >Upload</a> : showDisabled === true ?
                         <button
                           className='bg-purple-600 px-6 font-bold rounded-xl text-center opacity-50 cursor-not-allowed'
                           title='No permission to upload!'
-                        >Upload new file</button> : null
+                        >Upload</button> : null
                   }
 
                 </div> : null
