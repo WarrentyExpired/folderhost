@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useContext, useLayoutEffect } from 'react'
+import { useEffect, useState, useRef, useContext, useLayoutEffect, useCallback } from 'react'
 import moment from 'moment';
 import {
   FaFolderOpen,
@@ -31,7 +31,7 @@ const FileExplorer: React.FC = () => {
   const [selectedChildEl, setSelectedChildEl] = useState<number | null>(null);
   const directoryRef = useRef<HTMLDivElement | null>(null)
   const {
-    path, directory, setDirectory, directoryInfo, moveItem, itemInfo, setItemInfo, readDir, getParent, setShowCreateItemMenu, downloading, permissions, unzipping, waitingResponse, contextMenu, setContextMenu, scrollIndex, isDirLoading: isLoading
+    path, directory, setDirectory, directoryInfo, moveItem, itemInfo, setItemInfo, readDir, getParent, setShowCreateItemMenu, downloading, permissions, unzipping, waitingResponse, contextMenu, deleteItem, setContextMenu, scrollIndex, isDirLoading: isLoading
   } = useContext<ExplorerContextType>(ExplorerContext)
 
   const handleSort = (key: string) => {
@@ -97,6 +97,22 @@ const FileExplorer: React.FC = () => {
       directoryRef.current.scrollTop = scrollIndex.current;
     }
   }, [directory])
+
+  const handleDeleteKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.key !== 'Delete' || itemInfo?.id == -1 || !permissions?.delete) {
+      return
+    }
+
+    deleteItem(itemInfo)
+  }, [itemInfo, permissions]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleDeleteKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleDeleteKeyDown);
+    };
+  }, [handleDeleteKeyDown]);
 
   useEffect(() => {
     if (dropTarget) {
