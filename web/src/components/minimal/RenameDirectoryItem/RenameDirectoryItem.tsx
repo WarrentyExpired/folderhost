@@ -1,11 +1,11 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useCallback } from "react";
 import ExplorerContext from "../../../utils/ExplorerContext";
 import { MdDriveFileRenameOutline } from "react-icons/md";
 import { IoClose } from "react-icons/io5";
 import { useState } from "react";
 
 const RenameDirectoryItem: React.FC = () => {
-    const { renameItem, path, showRenameItemMenu, setShowRenameItemMenu, itemInfo } = useContext(ExplorerContext)
+    const { renameItem, showRenameItemMenu, setShowRenameItemMenu, itemInfo } = useContext(ExplorerContext)
     const [itemName, setItemName] = useState<string>("")
 
     useEffect(() => {
@@ -13,6 +13,23 @@ const RenameDirectoryItem: React.FC = () => {
             setItemName(itemInfo?.name);
         }
     }, [itemInfo])
+
+    const handleEnterKeyDown = useCallback((event: KeyboardEvent) => {
+        if (event.key !== 'Enter' || itemInfo?.id == -1) {
+            return
+        }
+        if (itemName != itemInfo?.name && itemName != "") {
+            setShowRenameItemMenu?.(false)
+            renameItem(itemInfo, itemName)
+        }
+    }, [itemInfo, itemName]);
+
+    useEffect(() => {
+        window.addEventListener('keydown', handleEnterKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleEnterKeyDown);
+        };
+    }, [handleEnterKeyDown]);
 
     return showRenameItemMenu && (
         <section className='bg-black fixed inset-0 flex items-center justify-center w-full bg-opacity-60 z-30 animate-in fade-in duration-200'>
@@ -65,7 +82,7 @@ const RenameDirectoryItem: React.FC = () => {
                                 >
                                     <MdDriveFileRenameOutline size={22} />
                                     Update
-                                </button> : 
+                                </button> :
                                 <button
                                     className='flex gap-2 items-center justify-center flex-1 py-3 px-4 font-semibold rounded-lg transition-all bg-gray-600 opacity-60 text-white shadow-lg cursor-not-allowed'
                                     disabled
