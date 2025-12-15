@@ -12,13 +12,12 @@ interface SettingsMenuProps {
 }
 
 const SettingsMenu: React.FC<SettingsMenuProps> = ({ isOpen, setIsOpen }) => {
-    const [itemName, setItemName] = useState<string>("")
-    const { showDisabled, setShowDisabled, disableCaching, setDisableCaching } = useContext(ExplorerContext)
+    const { showDisabled, setShowDisabled, disableCaching, setDisableCaching, readDir } = useContext(ExplorerContext)
     const [folderSizeMode, setFolderSizeMode] = useState(Cookies.get("mode") == "Quality mode" ? true : false)
-    // const [disableCaching, setDisableCaching] = useState(false)
 
     useEffect(() => {
         Cookies.set("mode", folderSizeMode ? "Quality mode" : "Optimized mode")
+        readDir()
     }, [folderSizeMode])
 
     return isOpen && (
