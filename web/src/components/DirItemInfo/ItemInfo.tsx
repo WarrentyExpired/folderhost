@@ -261,11 +261,11 @@ const ItemInfo = () => {
                   href={`/editor/${encodeURIComponent(itemInfo?.path ?? "./")}`}
                   target="_blank" rel="noreferrer"
                   className='bg-sky-700 px-6 font-bold text-center rounded-xl'
-                >Open Editor</a> : showDisabled === true ?
+                >Open in Code Editor</a> : showDisabled === true ?
                   <button
                     className='bg-sky-700 px-6 font-bold text-center rounded-xl opacity-50'
                     disabled
-                  >Open Editor</button> : null
+                  >Open in Code Editor</button> : null
 
             }
           </div>
